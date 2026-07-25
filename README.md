@@ -4,6 +4,9 @@ Keeps qBittorrent's port matched to whatever port Proton VPN is forwarding you. 
 
 Double click it. That's it.
 
+[![Download](https://img.shields.io/github/v/release/omv421/ProtonPortSync?label=download&color=2ea44f)](https://github.com/omv421/ProtonPortSync/releases/latest/download/ProtonPortSync.exe)
+[![Licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
+
 <p align="center">
   <img src="ProtonVPN_qBittorrent_Logo.png" width="180" alt="ProtonPortSync">
 </p>
@@ -91,7 +94,7 @@ That second row matters more than it looks. See below for why it's the normal st
 
 ## Install
 
-1. Download `ProtonPortSync.exe`
+1. [Download ProtonPortSync.exe](https://github.com/omv421/ProtonPortSync/releases/latest/download/ProtonPortSync.exe)
 2. Double click it
 
 There's no step 3. No Task Scheduler, no config file to edit, no renaming your network adapter, nothing to turn on by hand.
