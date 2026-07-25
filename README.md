@@ -1,8 +1,8 @@
 # ProtonPortSync
 
-**Keeps qBittorrent's listening port matched to the port Proton VPN forwards you — in under a second, without restarting qBittorrent.**
+Keeps qBittorrent's port matched to whatever port Proton VPN is forwarding you. Takes under a second and doesn't restart qBittorrent.
 
-Double-click it. That's the whole thing.
+Double click it. That's it.
 
 <p align="center">
   <img src="ProtonVPN_qBittorrent_Logo.png" width="180" alt="ProtonPortSync">
@@ -12,37 +12,43 @@ Double-click it. That's the whole thing.
 
 ## The problem
 
-Proton VPN gives you a forwarded port so people can connect to you. That port **changes** every time you reconnect. qBittorrent doesn't know it changed, so it sits listening on a dead port and your speeds quietly fall off a cliff.
+Proton VPN forwards you a port so people can connect to you. That port changes every time you reconnect.
 
-Proton VPN on Windows has no command line, so there's nothing official to hook into.
+qBittorrent doesn't know it changed. So it keeps listening on a port that's dead, and your speeds drop off.
 
-## What this does
+Proton VPN on Windows has no command line, so there's nothing official to plug into.
 
-1. Makes sure Proton VPN is running and actually connected.
-2. Reads the forwarded port out of Proton VPN's own log.
-3. Puts that port into qBittorrent — **live, without restarting it**.
+## What it does
+
+1. Checks Proton VPN is running and actually connected.
+2. Reads the forwarded port out of Proton VPN's log.
+3. Puts that port into qBittorrent while it's still running.
 
 ## Why not just restart qBittorrent?
 
-Because restarting means every torrent stops, re-checks, and reconnects. This talks to qBittorrent's Web API instead, so nothing is interrupted. Torrents keep seeding while the port changes underneath them.
+Restarting stops every torrent, then re-checks them, then reconnects. Takes ages.
 
-If the Web API isn't reachable for some reason, it falls back to editing the settings file and restarting — so it always works, it's just slower.
+This talks to qBittorrent's Web API instead. The process is never touched. I checked the process ID before and after, it's the same qBittorrent.
+
+If the Web API isn't reachable it falls back to editing the settings file and restarting. So it always works, it's just slower.
 
 ## Speed
 
-Measured on a real machine, not estimated:
+These are measured, not guessed.
 
 | Situation | Time |
 |---|---|
-| VPN connected, port changed | **0.7s** — no restart |
-| VPN connected, port already right | **0.2s** — does nothing |
-| qBittorrent closed | **0.9s** — starts it with the right port |
-| Proton VPN open but not connected | waits for you, then **~8s** after you click Connect |
-| Proton VPN closed | **~6s** — starts it and waits |
+| VPN connected, port changed | 0.7s, no restart |
+| VPN connected, port already right | 0.2s, does nothing |
+| qBittorrent closed | 0.9s, starts it with the right port |
+| Proton VPN open but not connected | waits for you, then under a second once the tunnel is up |
+| Proton VPN closed | about 6s, starts it and waits |
+
+The waiting isn't the tool being slow. That's Proton VPN connecting, and nothing can speed that up.
 
 ## What it looks like
 
-Normal run. Proton VPN reconnected and handed out a different port:
+Normal run. Proton had reconnected and given me a different port:
 
 ```
 22:01:55     0.0s  --- ProtonVPN -> qBittorrent port sync ---
@@ -66,31 +72,31 @@ Proton VPN open but not connected. It opens the Proton window, waits for you, th
 21:44:12     8.1s  Done in 8.1 seconds.
 ```
 
-That `port not assigned yet` line is the important one. There's a real gap between the tunnel coming up and Proton actually issuing a port. Anything that grabs the first value it sees during that gap hands qBittorrent a dead port from the previous session. This waits it out.
+That `port not assigned yet` line matters. There's a real gap between the tunnel coming up and Proton actually handing out a port. If you grab the first value you see in that gap, you give qBittorrent a dead port from the last session. This waits it out.
 
-Every number on this page came from a real run on a real machine. None of them are estimates.
+Every number here came from a real run. None of them are estimates.
 
-## What it copes with
+## What it handles
 
 | Situation | What happens |
 |---|---|
 | Proton VPN closed | Starts it, waits for it to connect |
-| Proton VPN open but **not connected** | Opens its window so you can press Connect, then carries on by itself |
-| qBittorrent closed | Starts it with the correct port already set |
+| Proton VPN open but not connected | Opens its window so you can hit Connect, then carries on by itself |
+| qBittorrent closed | Starts it with the right port already set |
 | qBittorrent running | Changes the port live, no restart |
-| Port already correct | Notices and does nothing |
-| Proton VPN never connects | Says so plainly and changes nothing |
+| Port already right | Notices, does nothing |
+| Proton VPN never connects | Says so and changes nothing |
 
-That fourth-from-last row matters more than it looks — see *Two things about Proton VPN* below.
+That second row matters more than it looks. See below for why it's the normal state and not some rare edge case.
 
 ## Install
 
-1. Download **`ProtonPortSync.exe`**
-2. Double-click it
+1. Download `ProtonPortSync.exe`
+2. Double click it
 
-There is no step 3. No Task Scheduler, no config file to edit, no renaming your network adapter, no enabling anything by hand.
+There's no step 3. No Task Scheduler, no config file to edit, no renaming your network adapter, nothing to turn on by hand.
 
-Prefer to run the script directly? `ProtonPortSync.ps1` is the same program:
+If you'd rather run the script directly, `ProtonPortSync.ps1` is the same program:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File ProtonPortSync.ps1
@@ -98,16 +104,18 @@ powershell -ExecutionPolicy Bypass -File ProtonPortSync.ps1
 
 ### First run
 
-The first run switches on qBittorrent's Web UI, because that's what allows the port to change without a restart. It's set to **this PC only**:
+The first run turns on qBittorrent's Web UI, because that's what lets the port change without a restart. It's set to this PC only:
 
 ```
 WebUI\Enabled         = true
-WebUI\Address         = 127.0.0.1     <- not reachable from anywhere else
+WebUI\Address         = 127.0.0.1     <- can't be reached from anywhere else
 WebUI\LocalHostAuth   = false         <- no login needed from this PC
 WebUI\Password_PBKDF2 = <random>
 ```
 
-Your settings file is backed up to `qBittorrent.ini.bak` first. To undo it: qBittorrent → Tools → Options → Web UI → untick. Or run with `-NoWebUiSetup` and it won't touch those at all.
+Your settings file gets backed up to `qBittorrent.ini.bak` first.
+
+To undo it: qBittorrent, Tools, Options, Web UI, untick. Or run with `-NoWebUiSetup` and it won't touch any of that.
 
 ## Options
 
@@ -115,37 +123,45 @@ You don't need any of these. They're here if you want them.
 
 | Option | What it does |
 |---|---|
-| `-Watch` | Stay running and re-sync automatically whenever the port changes. Ctrl+C to stop. |
-| `-DryRun` | Show what it *would* change. Changes nothing, starts nothing. |
-| `-Force` | Apply the port even if it already looks correct. |
-| `-NoRestart` | Never restart qBittorrent, Web UI only. |
-| `-NoWebUiSetup` | Don't touch the Web UI settings. |
-| `-PortOnly` | Just find and print the port. Doesn't touch qBittorrent. |
+| `-Watch` | Stays running and re-syncs whenever the port changes. Ctrl+C to stop. |
+| `-DryRun` | Shows what it would change. Changes nothing, starts nothing. |
+| `-Force` | Applies the port even if it already looks right. |
+| `-NoRestart` | Never restarts qBittorrent, Web UI only. |
+| `-NoWebUiSetup` | Leaves the Web UI settings alone. |
+| `-PortOnly` | Just finds and prints the port. Doesn't touch qBittorrent. |
 | `-TimeoutSeconds` | How long to wait for a port. Default 90. |
 
 ## Two things about Proton VPN that shaped this
 
-Both were found by testing, and both are the reason this handles some cases that other scripts don't.
+Both found by testing. They're why this handles cases other scripts don't.
 
-**1. Proton VPN 4.4.1 has no auto-connect.** It starts with Windows, but it starts *disconnected*. So "open but not connected" isn't a rare edge case — it's the normal state every time your PC boots. If a script trusts the port sitting in the log at that moment, it will hand qBittorrent a **dead port** from your last session, with no error at all. This one checks the tunnel is genuinely up first.
+**1. Proton VPN 4.4.1 has no auto-connect.** It starts with Windows, but it starts disconnected.
 
-**2. When you disconnect, the Proton VPN network adapter doesn't switch to "Down" — it disappears from Windows entirely.** A check written the obvious way would conclude you were still connected. This one also reads the log as a second opinion.
+So "open but not connected" isn't a rare case. It's the normal state every time your PC boots.
+
+If a script trusts the port sitting in the log at that moment, it hands qBittorrent a dead port from your last session, and nothing tells you it went wrong. This one checks the tunnel is actually up first.
+
+**2. When you disconnect, the Proton VPN network adapter doesn't go to "Down". It disappears from Windows completely.**
+
+A check written the obvious way would decide you were still connected. This one reads the log as a second opinion.
 
 ## One thing that isn't documented anywhere
 
-**qBittorrent 5.x refuses to open its Web UI when no password has ever been set** — even with the localhost login bypassed. Setting `WebUI\Enabled=true` on its own leaves port 8080 shut, and *nothing in any log says why*.
+qBittorrent 5.x won't open its Web UI if no password has ever been set. Not even with the localhost login bypassed.
 
-If you've followed another guide that says "enable the Web UI and bypass localhost auth" and it silently didn't work, that's why. This tool adds a random password automatically when none exists. A password you set yourself is never touched or read.
+Setting `WebUI\Enabled=true` on its own leaves port 8080 shut, and nothing in any log tells you why.
+
+If you followed another guide that said "turn on the Web UI and bypass localhost auth" and it just didn't work, that's why. This adds a random password when there isn't one. A password you set yourself is never touched or read.
 
 ## Requirements
 
-- Proton VPN for Windows, with **port forwarding switched on** in its settings
+- Proton VPN for Windows, with port forwarding turned on in its settings
 - qBittorrent
-- PowerShell 5.1 — already on every Windows 10 and 11 machine, nothing to install
+- PowerShell 5.1, which is already on every Windows 10 and 11 machine
 
-### What it was actually tested on
+### What I actually tested it on
 
-Being precise about this, because "should work" and "was tested" are different things:
+Being specific, because "should work" and "was tested" aren't the same thing.
 
 | | Tested on |
 |---|---|
@@ -154,11 +170,13 @@ Being precise about this, because "should work" and "was tested" are different t
 | qBittorrent | 5.1.0 |
 | Proton VPN | 4.4.1 |
 
-Windows 10 is very likely fine — nothing here uses anything Windows 11 specific — but **I haven't run it there**, so I'm not going to claim it works. Same for other qBittorrent versions: the Web API it uses (`/api/v2`) has been stable for years, but 5.1.0 is what was proven. If you try it elsewhere, an issue saying "worked" or "didn't" is genuinely useful.
+Windows 10 is probably fine, nothing here uses anything Windows 11 only, but I haven't run it there so I'm not going to say it works.
+
+Same with other qBittorrent versions. The Web API it uses (`/api/v2`) has been stable for years, but 5.1.0 is what I proved. If you try it somewhere else, an issue saying it worked or didn't is useful.
 
 ## Building the exe yourself
 
-The exe is just the script compiled with [PS2EXE](https://github.com/MScholtes/PS2EXE), so you never have to take my word for what's inside it:
+The exe is just the script compiled with [PS2EXE](https://github.com/MScholtes/PS2EXE), so you don't have to take my word for what's in it:
 
 ```powershell
 Install-Module ps2exe -Scope CurrentUser
@@ -169,18 +187,20 @@ That builds the icon from the logo, compiles the exe, and copies it to your Desk
 
 ## "Windows protected your PC"
 
-The exe isn't code-signed — certificates cost a few hundred a year and this is free. Click **More info → Run anyway**, or just run the `.ps1` instead. The full source is right here in this repo, which is rather the point.
+The exe isn't code signed. Certificates cost a few hundred a year and this is free.
+
+Click More info, then Run anyway. Or just run the `.ps1` instead. The full source is in this repo, which is the point.
 
 ## Support this
 
-If it saved you some annoyance, you can [buy me a coffee on Ko-fi](https://ko-fi.com/omv421). Entirely optional — the tool is free and always will be.
+If it saved you some hassle you can [buy me a coffee on Ko-fi](https://ko-fi.com/omv421). Totally optional, the tool is free and always will be.
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-tip-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/omv421)
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE). Do what you like with it.
+MIT, see [LICENSE](LICENSE). Do what you want with it.
 
-Uses [PS2EXE](https://github.com/MScholtes/PS2EXE) by Markus Scholtes (also MIT) to build the exe.
+Uses [PS2EXE](https://github.com/MScholtes/PS2EXE) by Markus Scholtes, also MIT, to build the exe.
 
-Not affiliated with Proton AG or the qBittorrent project. Just works with them.
+Not affiliated with Proton AG or the qBittorrent project. It just works with them.
