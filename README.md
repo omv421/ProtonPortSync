@@ -193,7 +193,7 @@ Same with other qBittorrent versions. The Web API it uses (`/api/v2`) has been s
 
 ## Building the exe yourself
 
-The exe is just the script compiled with [PS2EXE](https://github.com/MScholtes/PS2EXE), so you don't have to take my word for what's in it:
+The exe is just the script compiled with [PS2EXE](https://github.com/MScholtes/PS2EXE) (Microsoft Limited Public License 1.1, see [NOTICE](NOTICE)), so you don't have to take my word for what's in it:
 
 ```powershell
 Install-Module ps2exe -Scope CurrentUser
@@ -216,8 +216,10 @@ If it saved you some hassle you can [buy me a coffee on Ko-fi](https://ko-fi.com
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). Fork it, change it, sell it, whatever. Just keep the copyright line.
+My code is MIT, see [LICENSE](LICENSE). Fork it, change it, sell it, whatever. Just keep the copyright line.
 
-Uses [PS2EXE](https://github.com/MScholtes/PS2EXE) by Markus Scholtes, also MIT, to build the exe. See [NOTICE](NOTICE).
+The exe is built with [PS2EXE](https://github.com/MScholtes/PS2EXE) by Markus Scholtes, which is **not** MIT. It's the Microsoft Limited Public License 1.1, and that carries a Windows-only restriction MIT doesn't have. Doesn't change anything here since this is a Windows-only tool, but it's worth stating correctly. Details in [NOTICE](NOTICE).
+
+If you only want MIT code, skip the exe and run `ProtonPortSync.ps1`. That's the whole program, it's MIT, and no PS2EXE code is involved.
 
 Not affiliated with Proton AG or the qBittorrent project. It just works with them.
