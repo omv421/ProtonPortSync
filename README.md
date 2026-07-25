@@ -109,10 +109,22 @@ If you've followed another guide that says "enable the Web UI and bypass localho
 
 ## Requirements
 
-- Windows 10 or 11
-- Proton VPN (Windows app) with **port forwarding switched on** in its settings
-- qBittorrent (tested on 5.1)
-- PowerShell 5.1 — already on every Windows machine
+- Proton VPN for Windows, with **port forwarding switched on** in its settings
+- qBittorrent
+- PowerShell 5.1 — already on every Windows 10 and 11 machine, nothing to install
+
+### What it was actually tested on
+
+Being precise about this, because "should work" and "was tested" are different things:
+
+| | Tested on |
+|---|---|
+| Windows | 11 Pro, build 26200 |
+| PowerShell | 5.1.26100 |
+| qBittorrent | 5.1.0 |
+| Proton VPN | 4.4.1 |
+
+Windows 10 is very likely fine — nothing here uses anything Windows 11 specific — but **I haven't run it there**, so I'm not going to claim it works. Same for other qBittorrent versions: the Web API it uses (`/api/v2`) has been stable for years, but 5.1.0 is what was proven. If you try it elsewhere, an issue saying "worked" or "didn't" is genuinely useful.
 
 ## Building the exe yourself
 
@@ -131,7 +143,7 @@ The exe isn't code-signed — certificates cost a few hundred a year and this is
 
 ## Support this
 
-If it saved you some annoyance, you can [buy me a coffee](ADD_YOUR_LINK_HERE). Entirely optional — the tool is free and always will be.
+If it saved you some annoyance, you can [buy me a coffee on Ko-fi](https://ko-fi.com/YOUR-KOFI-NAME). Entirely optional — the tool is free and always will be.
 
 ## Licence
 
