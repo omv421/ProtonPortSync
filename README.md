@@ -35,6 +35,16 @@ This talks to qBittorrent's Web API instead. The process is never touched. I che
 
 If the Web API isn't reachable it falls back to editing the settings file and restarting. So it always works, it's just slower.
 
+## What about gluetun?
+
+[Gluetun](https://github.com/qdm12/gluetun) is good and you should use it if it fits. It is a different setup though, not a competing one.
+
+Gluetun **is** the VPN client. It makes its own WireGuard or OpenVPN connection inside a Docker container, so you are not running the Proton VPN Windows app at all, and qBittorrent has to run in Docker too on gluetun's network. It also gets the forwarded port but does not push it into qBittorrent by itself, so you still need something on top for that part.
+
+Being straight about it: if your stack is already in Docker, gluetun is the better answer. It asks Proton's API properly instead of reading a log file, and log formats change without warning.
+
+This is for the other case. You run the normal Proton VPN desktop app, you have a normal qBittorrent install, and you are not going to containerise your torrent client over a port number.
+
 ## Speed
 
 These are measured, not guessed.
