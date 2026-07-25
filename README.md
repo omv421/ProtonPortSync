@@ -173,7 +173,9 @@ The exe isn't code-signed — certificates cost a few hundred a year and this is
 
 ## Support this
 
-If it saved you some annoyance, you can [buy me a coffee on Ko-fi](https://ko-fi.com/YOUR-KOFI-NAME). Entirely optional — the tool is free and always will be.
+If it saved you some annoyance, you can [buy me a coffee on Ko-fi](https://ko-fi.com/omv421). Entirely optional — the tool is free and always will be.
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-tip-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/omv421)
 
 ## Licence
 
