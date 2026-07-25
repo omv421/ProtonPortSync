@@ -39,7 +39,9 @@ If the Web API isn't reachable it falls back to editing the settings file and re
 
 [Gluetun](https://github.com/qdm12/gluetun) is good and you should use it if it fits. It is a different setup though, not a competing one.
 
-Gluetun **is** the VPN client. It makes its own WireGuard or OpenVPN connection inside a Docker container, so you are not running the Proton VPN Windows app at all, and qBittorrent has to run in Docker too on gluetun's network. It also gets the forwarded port but does not push it into qBittorrent by itself, so you still need something on top for that part.
+Gluetun **is** the VPN client. It makes its own WireGuard or OpenVPN connection inside a Docker container, so you are not running the Proton VPN Windows app at all, and qBittorrent has to run in Docker too on gluetun's network.
+
+It also sets qBittorrent's port on its own, with no extra script or container. Its `VPN_PORT_FORWARDING_UP_COMMAND` setting runs whenever the port changes and posts straight to the same qBittorrent API this tool uses.
 
 Being straight about it: if your stack is already in Docker, gluetun is the better answer. It asks Proton's API properly instead of reading a log file, and log formats change without warning.
 
