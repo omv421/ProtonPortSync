@@ -35,6 +35,22 @@ This talks to qBittorrent's Web API instead. The process is never touched. I che
 
 If the Web API isn't reachable it falls back to editing the settings file and restarting. So it always works, it's just slower.
 
+## Other tools that do this
+
+I'd rather link these than pretend I'm the only one. Pick whichever suits you.
+
+### Quantum
+
+[Quantum](https://github.com/UHAXM1/Quantum) is the established option and it's popular for good reason. Same idea as this one: it reads the Proton VPN log and pushes the port through qBittorrent's Web API. It's a .NET app you leave running.
+
+What it does better: it's been around, it has a real user base, and it has had far more eyes on it than this.
+
+The differences are in the setup and the shape. Quantum asks you to turn on qBittorrent's Web UI yourself and then type the host and login into it. This one does that for you and then finishes, in about a fifth of a second, rather than sitting in the background. If you'd rather have something running and watching, use Quantum, or use `-Watch` here.
+
+One thing worth knowing whichever you pick: **if you have never set a Web UI password, qBittorrent won't open the Web UI at all**, and no log tells you why. Any tool that talks to the Web API is stuck until that's sorted. See the section further down.
+
+I haven't tested how Quantum behaves when Proton VPN is open but disconnected, so I'm not claiming anything about it either way.
+
 ## What about gluetun?
 
 [Gluetun](https://github.com/qdm12/gluetun) is good and you should use it if it fits. It is a different setup though, not a competing one.
