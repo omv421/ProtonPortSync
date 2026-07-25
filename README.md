@@ -19,7 +19,7 @@ Proton VPN forwards you a port so people can connect to you. That port changes e
 
 qBittorrent doesn't know it changed. So it keeps listening on a port that's dead, and your speeds drop off.
 
-Proton VPN on Windows has no command line, so there's nothing official to plug into.
+Proton VPN has an official CLI on Linux, but nothing on Windows. So there's nothing official to plug into, and reading the log is the only way in.
 
 ## What it does
 
