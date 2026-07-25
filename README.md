@@ -202,8 +202,8 @@ If it saved you some hassle you can [buy me a coffee on Ko-fi](https://ko-fi.com
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). Do what you want with it.
+MIT, see [LICENSE](LICENSE). Fork it, change it, sell it, whatever. Just keep the copyright line.
 
-Uses [PS2EXE](https://github.com/MScholtes/PS2EXE) by Markus Scholtes, also MIT, to build the exe.
+Uses [PS2EXE](https://github.com/MScholtes/PS2EXE) by Markus Scholtes, also MIT, to build the exe. See [NOTICE](NOTICE).
 
 Not affiliated with Proton AG or the qBittorrent project. It just works with them.

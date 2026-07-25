@@ -1,0 +1,10 @@
+ProtonPortSync uses PS2EXE by Markus Scholtes to compile the PowerShell
+script into an executable.
+
+PS2EXE is MIT licensed.
+https://github.com/MScholtes/PS2EXE
+
+This note lives here rather than in LICENSE because GitHub reads LICENSE
+automatically to work out what licence a project uses, and anything appended
+after the MIT text stops it recognising the file. It was reporting
+"NOASSERTION" until this was moved out.
