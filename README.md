@@ -40,6 +40,36 @@ Measured on a real machine, not estimated:
 | Proton VPN open but not connected | waits for you, then **~8s** after you click Connect |
 | Proton VPN closed | **~6s** — starts it and waits |
 
+## What it looks like
+
+Normal run. Proton VPN reconnected and handed out a different port:
+
+```
+22:01:55     0.0s  --- ProtonVPN -> qBittorrent port sync ---
+22:01:55     0.0s  ProtonVPN already running.
+22:01:56     0.7s  Forwarded port: 43130   (found in 0.1s)
+22:01:56     0.7s  Port set to 43130 live - no restart needed.
+22:01:56     0.7s  Done in 0.7 seconds.
+```
+
+Proton VPN open but not connected. It opens the Proton window, waits for you, then finishes on its own:
+
+```
+21:44:04     0.0s  --- ProtonVPN -> qBittorrent port sync ---
+21:44:04     0.0s  ProtonVPN already running.
+21:44:05     0.6s  ProtonVPN is open but not connected.
+21:44:05     0.6s  Opening the ProtonVPN window - press Connect and this will carry on by itself.
+21:44:05     0.6s  ProtonVPN is open but NOT connected. Waiting for you to connect it...
+21:44:11     7.4s  VPN connected, port not assigned yet...
+21:44:12     8.1s  Forwarded port: 43130
+21:44:12     8.1s  Port set to 43130 live - no restart needed.
+21:44:12     8.1s  Done in 8.1 seconds.
+```
+
+That `port not assigned yet` line is the important one. There's a real gap between the tunnel coming up and Proton actually issuing a port. Anything that grabs the first value it sees during that gap hands qBittorrent a dead port from the previous session. This waits it out.
+
+Every number on this page came from a real run on a real machine. None of them are estimates.
+
 ## What it copes with
 
 | Situation | What happens |
