@@ -150,7 +150,9 @@ A check written the obvious way would decide you were still connected. This one 
 
 ## One thing that isn't documented anywhere
 
-qBittorrent 5.x won't open its Web UI if no password has ever been set. Not even with the localhost login bypassed.
+qBittorrent won't open its Web UI if no password has ever been set. Not even with the localhost login bypassed.
+
+Measured on 5.1.0. It probably applies across 5.x, but 5.1.0 is the one I actually proved, so that's what I'll claim.
 
 Setting `WebUI\Enabled=true` on its own leaves port 8080 shut, and nothing in any log tells you why.
 

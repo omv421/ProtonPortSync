@@ -54,12 +54,13 @@
         WebUI\LocalHostAuth   = false       (no login needed from this PC)
         WebUI\Password_PBKDF2 = <random>    (see below)
 
-    The password is not optional. qBittorrent 5.x refuses to open the Web UI at
-    all when no password has ever been set - even with the localhost login
-    bypassed. Measured 2026-07-24: Enabled=true on its own left port 8080 shut,
-    with nothing in any log saying why, and this script quietly fell back to
-    restarting qBittorrent every single time. A random password is only ADDED
-    when none exists. One you set yourself is never touched or read.
+    The password is not optional. qBittorrent refuses to open the Web UI at all
+    when no password has ever been set - even with the localhost login bypassed.
+    Measured 2026-07-24 on 5.1.0, which is the only version it was proven on:
+    Enabled=true on its own left port 8080 shut, with nothing in any log saying
+    why, and this script quietly fell back to restarting qBittorrent every
+    single time. A random password is only ADDED when none exists. One you set
+    yourself is never touched or read.
 
     The address matters too. The old value was "*", which listens on every
     network card including the VPN itself. 127.0.0.1 cannot be reached from
@@ -393,9 +394,10 @@ function Test-IniKeyHasValue {
 }
 
 function New-QbPasswordHash {
-    <# qBittorrent 5.x will NOT start its Web UI unless a password hash exists,
-       even with the localhost login bypassed. Proven here on 2026-07-24: with
+    <# qBittorrent will NOT start its Web UI unless a password hash exists, even
+       with the localhost login bypassed. Proven on 5.1.0 on 2026-07-24: with
        WebUI\Enabled=true but no WebUI\Password_PBKDF2, port 8080 never opened.
+       Other 5.x versions were not tested, so this only claims 5.1.0.
        Format is @ByteArray(<base64 salt>:<base64 key>), PBKDF2-HMAC-SHA512,
        100000 iterations, 16-byte salt, 64-byte key.
        The argument is named $Secret, not $Password, on purpose: PowerShell's
@@ -572,10 +574,10 @@ function Sync-Port {
             if ($updated) { $lines = $updated; $touched = $true; $anyWebUi = $true }
         }
 
-        # qBittorrent 5.x will not open the Web UI at all when no password hash
-        # exists - not even with the localhost login bypassed. Measured here on
-        # 2026-07-24: Enabled=true alone left port 8080 shut. Only ever ADD one;
-        # never overwrite a password the user has set themselves.
+        # qBittorrent will not open the Web UI at all when no password hash
+        # exists - not even with the localhost login bypassed. Measured on 5.1.0
+        # on 2026-07-24: Enabled=true alone left port 8080 shut. Only ever ADD
+        # one; never overwrite a password the user has set themselves.
         if (-not (Test-IniKeyHasValue -Lines $lines -Section 'Preferences' -Key 'WebUI\Password_PBKDF2')) {
             $hash    = New-QbPasswordHash (New-RandomPassword)
             $updated = Set-IniValue -Lines $lines -Section 'Preferences' `
