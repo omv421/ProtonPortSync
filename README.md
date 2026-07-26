@@ -184,6 +184,26 @@ Your settings file gets backed up to `qBittorrent.ini.bak` first.
 
 To undo it: qBittorrent, Tools, Options, Web UI, untick. Or run with `-NoWebUiSetup` and it won't touch any of that.
 
+## Running it automatically at login
+
+Optional. If you'd rather never click it:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File Install-AtLogin.ps1
+```
+
+To undo that, same command with `-Remove`.
+
+**It does not just run and give up.** That would be useless here, and the reason is the first Proton VPN quirk further down: Proton launches itself at login but launches *disconnected*, so at that moment there is no tunnel and no port, and there won't be one until you press Connect.
+
+So instead it starts hidden and **waits up to 30 minutes** for you to connect. The moment you do, it syncs the port and exits. If you never connect, it leaves quietly having done nothing and without logging an error, because choosing not to use the VPN today isn't a fault.
+
+While it's waiting it stays out of your way. It won't throw Proton's window across your screen the way a manual run does, because Proton deliberately starts minimised to the tray and overriding that on every single boot is obnoxious.
+
+Only one copy runs at a time, so logging out and back in won't stack them up.
+
+No window ever appears. To see what it did, open `%TEMP%\vpn_qbittorrent_log.txt`.
+
 ## Options
 
 You don't need any of these. They're here if you want them.

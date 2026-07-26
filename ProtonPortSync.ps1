@@ -80,6 +80,7 @@ param(
     [switch] $DryRun,
     [switch] $PortOnly,
     [switch] $NoHold,
+    [switch] $AtLogin,
     [string] $VpnLogPath,
     [int]    $TimeoutSeconds = 90
 )
@@ -105,6 +106,28 @@ $WebUiUrl = 'http://{0}:{1}' -f $Cfg.WebUiHost, $Cfg.WebUiPort
 # Lets a test point this at a stand-in log, so the watching can be proven without
 # making the real VPN drop and reconnect.
 if ($VpnLogPath) { $Cfg.ProtonLog = $VpnLogPath }
+
+# --------------------------------------------------------------- at login ---
+# Started by Windows at login rather than by a person.
+#
+# Two things make this different from a normal run. Proton VPN launches itself
+# at login but launches DISCONNECTED, so at this moment there is usually no
+# tunnel and no port, and there will not be one until the VPN is connected by
+# hand. A 90 second wait would simply expire. Second, nobody is looking at a
+# window, so there is no point holding one open or reporting a timeout as a
+# failure.
+#
+# So: wait a long time, quietly, and if the VPN never comes up just leave.
+$script:LoginMutex = $null
+if ($AtLogin) {
+    # One at a time. Logging out and back in without rebooting would otherwise
+    # leave two of these waiting, both writing to the same log.
+    $script:LoginMutex = New-Object System.Threading.Mutex($false, 'Local\ProtonPortSync_AtLogin')
+    if (-not $script:LoginMutex.WaitOne(0)) { exit 0 }
+
+    $NoHold = $true
+    if (-not $PSBoundParameters.ContainsKey('TimeoutSeconds')) { $TimeoutSeconds = 1800 }
+}
 
 # ---------------------------------------------------------------- logging ---
 $script:T0 = Get-Date
@@ -307,6 +330,10 @@ function Wait-ForVpnPort {
     # Say which of the two things actually went wrong. Blaming port forwarding
     # when the VPN simply never connected sends you looking in the wrong place.
     if (-not (Test-VpnConnected)) {
+        # At login, not connecting is a normal choice, not a fault. Logging it
+        # as an ERROR would leave a scary line in the log every day the VPN
+        # simply was not wanted. The caller prints a calm note instead.
+        if ($AtLogin) { return 0 }
         Write-Fail "ProtonVPN never connected, after waiting $TimeoutSeconds seconds. Press Connect in ProtonVPN, then run this again."
     } else {
         Write-Fail "ProtonVPN is connected but handed out no port in $TimeoutSeconds seconds. Check that port forwarding is switched on in ProtonVPN's settings."
@@ -656,8 +683,16 @@ if (-not (Get-Process -Name 'ProtonVPN*' -ErrorAction SilentlyContinue)) {
     if (-not (Test-VpnConnected)) {
         Write-Log 'ProtonVPN is open but not connected.' 'Yellow'
         if (-not $DryRun) {
-            Write-Log 'Opening the ProtonVPN window - press Connect and this will carry on by itself.' 'Yellow'
-            try { Start-Process -FilePath $Cfg.ProtonExe | Out-Null } catch { }
+            # Popping the Proton window open is helpful when a person just
+            # double-clicked this and is sat waiting. At login it is the
+            # opposite: Proton deliberately starts minimised to the tray, and
+            # throwing its window across the screen on every boot is exactly
+            # the kind of thing that gets a tool uninstalled. So at login we
+            # wait in silence instead.
+            if (-not $AtLogin) {
+                Write-Log 'Opening the ProtonVPN window - press Connect and this will carry on by itself.' 'Yellow'
+                try { Start-Process -FilePath $Cfg.ProtonExe | Out-Null } catch { }
+            }
             $freshAfter = Get-Date
         }
     }
@@ -666,7 +701,16 @@ if (-not (Get-Process -Name 'ProtonVPN*' -ErrorAction SilentlyContinue)) {
 # 2. Which port?
 $tPort = Get-Date
 $port  = Wait-ForVpnPort -TimeoutSeconds $TimeoutSeconds -FreshAfter $freshAfter
-if ($port -le 0) { Stop-Script 1 }
+if ($port -le 0) {
+    # At login, never connecting is a normal way for the day to go. Somebody
+    # simply did not want the VPN on. That is not a failure worth reporting to
+    # a screen nobody is looking at.
+    if ($AtLogin) {
+        Write-Log 'At login: the VPN was never connected, so there was nothing to do. Leaving.' 'DarkGray'
+        Stop-Script 0
+    }
+    Stop-Script 1
+}
 Write-Log ('Forwarded port: {0}   (found in {1:0.0}s)' -f $port, ((Get-Date) - $tPort).TotalSeconds) 'Green'
 
 if ($PortOnly) {
