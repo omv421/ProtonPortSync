@@ -127,6 +127,13 @@ if ($AtLogin) {
 
     $NoHold = $true
     if (-not $PSBoundParameters.ContainsKey('TimeoutSeconds')) { $TimeoutSeconds = 1800 }
+
+    # Drop below normal priority. Measured cost of the waiting loop is about
+    # 0.16% of one core, so this is not fixing a problem. But this thing can sit
+    # there for half an hour, and half an hour is long enough to overlap with a
+    # game. Below normal means Windows hands the cycles to the game first, every
+    # time, without having to be asked.
+    try { (Get-Process -Id $PID).PriorityClass = 'BelowNormal' } catch { }
 }
 
 # ---------------------------------------------------------------- logging ---
@@ -224,6 +231,21 @@ function ConvertTo-LocalStamp {
     return $null
 }
 
+function Test-VpnAppRunning {
+    <# Is the Proton VPN APP open? Not the same question as "is anything called
+       ProtonVPN running".
+
+       Proton leaves ProtonVPNService and ProtonVPN.NrptWatchdog running in the
+       background all the time, whether the app is open or not. Matching on
+       ProtonVPN* therefore answers "yes" while the app is firmly closed, and
+       the old check did exactly that: it reported the app as running, declined
+       to start it, then waited for a connection that could never arrive because
+       there was no app to connect with.
+
+       ProtonVPN.Client is the window you actually click. #>
+    return (@(Get-Process -Name 'ProtonVPN.Client*' -ErrorAction SilentlyContinue).Count -gt 0)
+}
+
 function Test-VpnConnected {
     <# Is the VPN actually CONNECTED, not merely open?
        This matters more than it looks. ProtonVPN can sit open and disconnected
@@ -299,7 +321,8 @@ function Wait-ForVpnPort {
         # open-but-disconnected ProtonVPN still has the last session's port
         # sitting in the log, and that port is dead.
         if (-not (Test-VpnConnected)) {
-            $msg = 'ProtonVPN is open but NOT connected. Waiting for you to connect it...'
+            $msg = if (Test-VpnAppRunning) { 'ProtonVPN is open but NOT connected. Waiting for you to connect it...' }
+                   else                    { 'The ProtonVPN app is closed. Waiting in case you open and connect it...' }
             if ($msg -ne $lastMsg) { Write-Log $msg 'Yellow'; $lastMsg = $msg }
             Start-Sleep -Milliseconds $Cfg.PollMs
             continue
@@ -660,13 +683,21 @@ Write-Log '--- ProtonVPN -> qBittorrent port sync ---' 'White'
 
 # 1. ProtonVPN up?
 $freshAfter = $null
-if (-not (Get-Process -Name 'ProtonVPN*' -ErrorAction SilentlyContinue)) {
+if (-not (Test-VpnAppRunning)) {
     if (-not (Test-Path -LiteralPath $Cfg.ProtonExe)) {
         Write-Fail "ProtonVPN not found: $($Cfg.ProtonExe)"
         Stop-Script 1
     }
     if ($DryRun) {
         Write-Log 'DRY RUN: ProtonVPN is not running. Would start it. Nothing started.' 'Cyan'
+    } elseif ($AtLogin) {
+        # Starting ProtonVPN is right when a person double-clicked this: they
+        # asked for the port, so they want the VPN. At login it is presumptuous.
+        # ProtonVPN starts itself at login anyway, and if it is closed it is
+        # because it was closed on purpose. Wait instead, and pick things up if
+        # and when it appears.
+        Write-Log 'At login: the ProtonVPN app is closed. Not opening it, just waiting in case you do.' 'DarkGray'
+        $freshAfter = $script:T0
     } else {
         Write-Log 'Starting ProtonVPN...' 'DarkYellow'
         Start-Process -FilePath $Cfg.ProtonExe | Out-Null
