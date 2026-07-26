@@ -127,7 +127,19 @@ Here is a real log, five disconnect and reconnect cycles inside two minutes:
 
 Same server, same port, every time. The port really does drop to nothing while you are disconnected, and Proton hands the identical one back.
 
-The reason is in Proton's own log lines: the mapping says `expiring in 00:01:00`. The forwarded port is a lease held on Proton's side, and reconnecting before it expires gets you the same one. Leave it disconnected for a few minutes and you get a different port.
+What is actually measured, from two days of logs:
+
+| gap while disconnected | port came back |
+|---|---|
+| 1.3s | same |
+| 2.7s | same |
+| 3.8s | same |
+| 13.3s | same |
+| 22.8 hours | **different** |
+
+So short reconnects keep your port, and a long enough gap gets you a new one. **Where the boundary sits is not known.** It is somewhere between 13 seconds and 22.8 hours, which is not a useful answer, and the long case also involved a different Proton server, so that is not a clean comparison either.
+
+Proton's log does say the mapping is `expiring in 00:01:00`, and while you are connected it visibly refreshes on that cadence. It is tempting to conclude a 60 second disconnect loses your port. The data here does not show that, so this README is not going to claim it.
 
 **Nothing needs fixing when this happens.** A port that has not changed is the good case. The tool notices, says it is already correct, and exits in about 0.2 seconds without touching qBittorrent.
 
