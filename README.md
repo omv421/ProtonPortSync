@@ -107,6 +107,30 @@ That `port not assigned yet` line matters. There's a real gap between the tunnel
 
 Every number here came from a real run. None of them are estimates.
 
+## "It keeps giving me the same port, it's not refreshing"
+
+That's Proton, and it is not a fault. Reconnect quickly and you get your old port straight back.
+
+Here is a real log, five disconnect and reconnect cycles inside two minutes:
+
+```
+16:26:32   (none)  ->  53992     connected to US-WA#445
+16:27:45   53992   ->  (none)    disconnected
+16:27:48   (none)  ->  53992     connected to US-WA#445
+16:27:53   53992   ->  (none)    disconnected
+16:27:57   (none)  ->  53992     connected to US-WA#445
+16:28:02   53992   ->  (none)    disconnected
+16:28:03   (none)  ->  53992     connected to US-WA#445
+16:28:11   53992   ->  (none)    disconnected
+16:28:24   (none)  ->  53992     connected to US-WA#445
+```
+
+Same server, same port, every time. The port really does drop to nothing while you are disconnected, and Proton hands the identical one back.
+
+The reason is in Proton's own log lines: the mapping says `expiring in 00:01:00`. The forwarded port is a lease held on Proton's side, and reconnecting before it expires gets you the same one. Leave it disconnected for a few minutes and you get a different port.
+
+**Nothing needs fixing when this happens.** A port that has not changed is the good case. The tool notices, says it is already correct, and exits in about 0.2 seconds without touching qBittorrent.
+
 ## What it handles
 
 | Situation | What happens |
