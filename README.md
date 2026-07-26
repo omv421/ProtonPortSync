@@ -135,9 +135,10 @@ What is actually measured, from two days of logs:
 | 2.7s | same |
 | 3.8s | same |
 | 13.3s | same |
-| 22.8 hours | **different** |
+| **14.9 minutes** | **different** (53992 to 40547) |
+| 22.8 hours | different |
 
-So short reconnects keep your port, and a long enough gap gets you a new one. **Where the boundary sits is not known.** It is somewhere between 13 seconds and 22.8 hours, which is not a useful answer, and the long case also involved a different Proton server, so that is not a clean comparison either.
+So short reconnects keep your port, and a long enough gap gets you a new one. **Where the boundary sits is still not known**, but it is somewhere between 13 seconds and 15 minutes. Not precise, and far better than a guess.
 
 Proton's log does say the mapping is `expiring in 00:01:00`, and while you are connected it visibly refreshes on that cadence. It is tempting to conclude a 60 second disconnect loses your port. The data here does not show that, so this README is not going to claim it.
 
