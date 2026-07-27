@@ -223,11 +223,15 @@ You don't need any of these. They're here if you want them.
 
 Both found by testing. They're why this handles cases other scripts don't.
 
-**1. Proton VPN 4.4.1 has no auto-connect.** It starts with Windows, but it starts disconnected.
+**1. Proton VPN starts up disconnected unless you go and switch auto-connect on, and the setting is easy to miss.**
 
-So "open but not connected" isn't a rare case. It's the normal state every time your PC boots.
+It lives at **Settings → General → Auto-startup → Auto-connect**, nested under the auto-startup option rather than sitting on its own. It is off by default.
 
-If a script trusts the port sitting in the log at that moment, it hands qBittorrent a dead port from your last session, and nothing tells you it went wrong. This one checks the tunnel is actually up first.
+So out of the box, "the app is open but not connected" is the normal state every time your PC boots, not a rare case.
+
+If a script trusts the port sitting in the log at that moment, it hands qBittorrent a dead port left over from your last session, and nothing tells you it went wrong. This one checks the tunnel is actually up first.
+
+> **Correction, 2026-07-26.** This section previously said version 4.4.1 has no auto-connect at all. That was wrong twice over. The version is 5.1.5, and it does have auto-connect. The mistake came from searching an old `v4.4.1` folder that Proton had left behind after updating, and taking the first result without checking whether there was more than one. The behaviour described above is real and was the reason for the design. The explanation for it was not.
 
 **2. When you disconnect, the Proton VPN network adapter doesn't go to "Down". It disappears from Windows completely.**
 
@@ -258,7 +262,7 @@ Being specific, because "should work" and "was tested" aren't the same thing.
 | Windows | 11 Pro, build 26200 |
 | PowerShell | 5.1.26100 |
 | qBittorrent | 5.1.0 |
-| Proton VPN | 4.4.1 |
+| Proton VPN | 5.1.5 |
 
 Windows 10 is probably fine, nothing here uses anything Windows 11 only, but I haven't run it there so I'm not going to say it works.
 

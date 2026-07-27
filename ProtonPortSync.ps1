@@ -10,11 +10,16 @@
     3. Puts that port into qBittorrent.
 
   TWO THINGS ABOUT PROTONVPN THAT SHAPE THIS SCRIPT
-    1. Proton VPN 4.4.1 has NO auto-connect. Checked 2026-07-24 by searching the
-       app's own files - the feature simply is not there. The app does start
-       itself with Windows, but it starts DISCONNECTED. So "open but not
-       connected" is not a rare edge case, it is the normal state every time the
-       PC boots, and it is the case this script has to handle best.
+    1. Proton VPN starts DISCONNECTED unless auto-connect is switched on, and
+       that setting is easy to miss. It is at Settings, General, Auto-startup,
+       Auto-connect - nested under auto-startup rather than on its own - and it
+       is off by default. So out of the box, "open but not connected" is not a
+       rare edge case, it is the normal state every boot, and it is the case
+       this script has to handle best.
+       (Corrected 2026-07-26. This used to claim version 4.4.1 had no
+       auto-connect at all. Wrong twice: the installed version is 5.1.5, and it
+       does have the feature. The search that produced that claim had read an
+       old v4.4.1 folder Proton left behind after updating.)
     2. When you disconnect, the ProtonVPN network adapter does not switch to
        "Down" - it DISAPPEARS from Windows completely. A check written only for
        "Down" would decide you were still connected. That is why the check below

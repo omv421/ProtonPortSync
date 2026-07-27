@@ -15,7 +15,8 @@
   Not what you might expect, and the difference matters.
 
   Proton VPN launches itself when Windows starts, but it launches DISCONNECTED,
-  and there is no auto-connect setting in the Windows app to change that. So at
+  unless you have switched on Settings, General, Auto-startup, Auto-connect,
+  which is off by default and easy to miss. So at
   the moment you log in there is no tunnel and no forwarded port, and there will
   not be one until you press Connect.
 
